@@ -5,7 +5,7 @@
 
 /*-----------------------------------------------------------------------*/
 
-volatile uint32_t g_timer_ms_tick;
+volatile uint32_t jiffies;
 
 /*
  * Timer compare output 0A interrupt
@@ -16,7 +16,7 @@ ISR(TIMER0_COMP_vect)
 ISR(TIMER0_COMPA_vect)
 #endif
 {
-	++g_timer_ms_tick;
+	++jiffies;
 }
 
 // timer_init
@@ -46,7 +46,7 @@ uint32_t jiffie(void)
 	uint32_t res;
 	ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
 	{
-		res = g_timer_ms_tick;
+		res = jiffies;
 	}
 	return res;
 }
@@ -59,7 +59,7 @@ uint32_t duration(uint32_t t0)
 	uint32_t res;
 	ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
 	{
-		res = g_timer_ms_tick;
+		res = jiffies;
 	}
 	// handle the case where the timer has overflowed
 	if (t0 > res)

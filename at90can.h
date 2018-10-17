@@ -43,30 +43,38 @@
 extern struct can_device at90can_dev;
 
 // initialize the device
-extern uint8_t at90can_init(can_init_t* settings);
+extern int at90can_init(can_init_t* settings, struct can_device* dev);
+
+// reinitialize the device
+extern int at90can_reinit(struct can_device* dev);
 
 // run self test on device
-extern uint8_t at90can_self_test(void);
-
-// find a free tx buf
-extern uint8_t at90can_get_next_free_tx_mob(int *txbuf_n);
-
-// send a can message to the device
-extern void at90can_write_msg(int tx_mob_idx, const can_msg_t* msg);
+extern int at90can_self_test(struct can_device* dev);
 
 // check for mob that has a received can message
-extern uint8_t at90can_check_msg_received(void);
+extern int at90can_check_msg_received(struct can_device* dev);
+
+// find a free tx buf
+extern int at90can_get_next_free_tx_mob(struct can_device* dev,
+					int *txbuf_n);
+
+// send a can message to the device
+extern void at90can_write_msg(struct can_device* dev, int tx_mob_idx,
+			      const can_msg_t* msg);
 
 // read a can message received by device
-extern uint8_t at90can_read_msg(can_msg_t* msg);
+extern int at90can_read_msg(struct can_device* dev, can_msg_t* msg);
 
 // called to see if device interrupted, also does interrupt work
-extern uint8_t at90can_handle_interrupt(uint8_t* status_flag);
+extern int at90can_handle_interrupt(struct can_device* dev,
+				    int* status_flag);
 
 // called to get rx,tx error counts
-extern uint8_t at90can_error_counts(uint8_t* tx_count, uint8_t* rx_count);
+extern int at90can_error_counts(struct can_device* dev,
+				uint8_t* tx_count,
+				uint8_t* rx_count);
 
 // clear the tx buffers of any unsent messages
-extern void at90can_clear_tx_buffers(void);
+extern void at90can_clear_tx_buffers(struct can_device* dev);
 
 #endif

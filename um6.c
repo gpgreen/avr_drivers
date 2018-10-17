@@ -377,8 +377,8 @@ void um6_set_gyro_zero_rate_calibration(void)
 	// delay for 4 seconds, resetting the watchdog every 100ms
 	int count = 0;
 	while(++count < 40) {
-		uint16_t tstart = timer_current_time();
-		while (timer_passed_time_tenth_ms(tstart) < 1000);
+		uint32_t tstart = jiffie();
+		while (duration(tstart) < 1000);
 		watchdog_reset();
 	}
 	// now write to flash
@@ -388,10 +388,10 @@ void um6_set_gyro_zero_rate_calibration(void)
 // um6 should be level, when this is commanded
 void um6_set_accel_ref_vector(void)
 {
-	uint16_t tstart = timer_current_time();
+	uint32_t tstart = jiffie();
 	um6_command_register(UM6_SET_ACCEL_REF);
 	// delay for 100 msecs
-	while (timer_passed_time_tenth_ms(tstart) < 1000);
+	while (duration(tstart) < 1000);
 	// now write to flash
 	um6_command_register(UM6_FLASH_COMMIT);
 }
@@ -400,10 +400,10 @@ void um6_set_accel_ref_vector(void)
 // is commanded
 void um6_set_mag_ref_vector(void)
 {
-	uint16_t tstart = timer_current_time();
+	uint32_t tstart = jiffie();
 	um6_command_register(UM6_SET_MAG_REF);
 	// delay for 100 msecs
-	while (timer_passed_time_tenth_ms(tstart) < 1000);
+	while (duration(tstart) < 1000);
 	// now write to flash
 	um6_command_register(UM6_FLASH_COMMIT);
 }

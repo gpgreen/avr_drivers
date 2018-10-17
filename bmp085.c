@@ -122,7 +122,7 @@ static void get_cal_param(struct bmp085_dev_t* device, uint8_t* data)
              device->ac3);
     PDEBUG2("\tac4:%hu ac5:%hu ac6:%hu", device->ac4, device->ac5,
              device->ac6);
-    PDEBUG2("\tb1:%hd b2:%hd"), device->b1, device->b2);
+    PDEBUG2("\tb1:%hd b2:%hd", device->b1, device->b2);
     PDEBUG2("\tmb:%hd mc:%hd md:%hd", device->mb, device->mc,
             device->md);
 }

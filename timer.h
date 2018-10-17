@@ -4,6 +4,8 @@
 #include "defs.h"
 #include <inttypes.h>
 
+extern volatile uint32_t jiffies;
+
 // initialize the timer hardware
 void timer_init(void);
 
