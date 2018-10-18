@@ -7,7 +7,6 @@
 #include <avr/eeprom.h>
 #include <avr/pgmspace.h>
 #include <stdio.h>
-#include "canaero.h"
 #include "watchdog.h"
 
 /* ---------------------------------------------- */
@@ -79,20 +78,6 @@ void watchdog_print_flags()
 			 g_reset_count.watchdog_resets, g_reset_count.brown_out_resets,
 			 g_reset_count.external_resets, g_reset_count.power_on_resets);
 	
-}
-
-// put resets in can message
-void watchdog_mis2_data(can_msg_t* msg)
-{
-	convert_ushort_to_big_endian(g_reset_count.watchdog_resets, &(msg->data[4]));
-	convert_ushort_to_big_endian(g_reset_count.brown_out_resets, &(msg->data[6]));
-}
-
-// put resets in can message
-void watchdog_mis3_data(can_msg_t* msg)
-{
-	convert_ushort_to_big_endian(g_reset_count.external_resets, &(msg->data[4]));
-	convert_ushort_to_big_endian(g_reset_count.power_on_resets, &(msg->data[6]));
 }
 
 /* reset the watchdog */

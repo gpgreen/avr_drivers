@@ -377,4 +377,17 @@ void canaero_reset_nod_message_sequence(canaero_init_t *proto)
         proto->nod_msg_templates[i].msg_code = 0;
 }
 
+// put resets in can message
+void watchdog_mis2_data(can_msg_t* msg)
+{
+	convert_ushort_to_big_endian(g_reset_count.watchdog_resets, &(msg->data[4]));
+	convert_ushort_to_big_endian(g_reset_count.brown_out_resets, &(msg->data[6]));
+}
+
+// put resets in can message
+void watchdog_mis3_data(can_msg_t* msg)
+{
+	convert_ushort_to_big_endian(g_reset_count.external_resets, &(msg->data[4]));
+	convert_ushort_to_big_endian(g_reset_count.power_on_resets, &(msg->data[6]));
+}
 

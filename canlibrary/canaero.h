@@ -165,4 +165,8 @@ extern void canaero_set_nodeid(canaero_init_t *proto, uint8_t newid);
 
 extern void canaero_reset_nod_message_sequence(canaero_init_t *proto);
 
+// callback functions to load resets into a can message
+extern void watchdog_mis2_data(can_msg_t* msg);
+extern void watchdog_mis3_data(can_msg_t* msg);
+
 #endif

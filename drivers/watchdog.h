@@ -3,7 +3,6 @@
 
 #include <inttypes.h>
 #include <avr/wdt.h>
-#include "can.h"
 
 // reset source flags
 extern uint8_t g_reset_flags;
@@ -24,8 +23,6 @@ extern struct reset_count g_reset_count;
 extern void watchdog_init(int watchdog_clock);
 extern void watchdog_reset_count_update(void);
 extern void watchdog_print_flags(void);
-extern void watchdog_mis2_data(can_msg_t* msg);
-extern void watchdog_mis3_data(can_msg_t* msg);
 extern void watchdog_reset(void);
 
 #endif
