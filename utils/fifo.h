@@ -4,6 +4,7 @@
 #define FIFO_H_
 
 #include "defs.h"
+#include <string.h>
 #include <avr/io.h>
 #include <util/atomic.h>
 
@@ -30,6 +31,7 @@ inline void fifo_init(struct fifo* fifo)
  	fifo->idx_r = 0;
 	fifo->idx_w = 0;
 	fifo->count = 0;
+    memset(fifo->buff, 0, FIFO_SIZE);
 }
 
 /* 
@@ -57,7 +59,7 @@ inline void fifo_put_safe(struct fifo* fifo, uint8_t c)
 	fifo->buff[i++] = c;
 	ATOMIC_BLOCK(ATOMIC_FORCEON) 
 	{
-		fifo->count++;
+		++fifo->count;
 	}
 	if(i >= sizeof(fifo->buff))
 		i = 0;
@@ -79,7 +81,7 @@ inline int fifo_put_unsafe(struct fifo* fifo, uint8_t c)
 	if(fifo->count >= sizeof(fifo->buff))
 		return FIFO_FULL;
  	fifo->buff[i++] = c;
-	fifo->count++;
+	++fifo->count;
 	if(i >= sizeof(fifo->buff))
 		i = 0;
 	fifo->idx_w = i;
@@ -102,7 +104,7 @@ inline uint8_t fifo_get_safe(struct fifo* fifo)
 	d = fifo->buff[i++];
 	ATOMIC_BLOCK(ATOMIC_FORCEON) 
 	{
-		fifo->count--;
+		--fifo->count;
 	}
 	if(i >= sizeof(fifo->buff))
 		i = 0;
@@ -126,7 +128,7 @@ inline int fifo_get_unsafe(struct fifo* fifo, uint8_t* byte)
 	if(fifo->count == 0)
 		return FIFO_EMPTY;
 	*byte = fifo->buff[i++];
-	fifo->count--;
+	--fifo->count;
 	if(i >= sizeof(fifo->buff))
 		i = 0;
 	fifo->idx_r = i;
