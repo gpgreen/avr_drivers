@@ -96,7 +96,7 @@ void l3g4200d_init(void)
 	_delay_ms(5);
 
 	/* get the WHO_AM_I register, make sure it is ok */
-	if (l3g4200d_read_registers(L3G_WHOAMI, &buf, 1) || buf != 0b11010011)
+	if (l3g4200d_read_registers(L3G_WHOAMI, &buf, 1) || buf != 0xd3)
 		failed(7);
 	
 	/* ODR 100hz, BW cutoff 12.5, normal mode */
@@ -146,7 +146,7 @@ uint8_t l3g4200d_self_test(void)
 {
 	uint8_t buf;
 	
-	if (l3g4200d_read_registers(L3G_WHOAMI, &buf, 1) || buf != 0b11010011)
+	if (l3g4200d_read_registers(L3G_WHOAMI, &buf, 1) || buf != 0xd3)
 		failed(7);
 	// if correct, return 0
 	return 0;

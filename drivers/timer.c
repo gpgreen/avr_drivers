@@ -21,19 +21,19 @@ ISR(TIMER0_COMPA_vect)
 
 // timer_init
 //
-// We want this timer to measure in units of milliseconds
-// or 1000 usecs per unit
+// We want this timer to measure in units of tenth milliseconds
+// or 100 usecs per unit
 void timer_init(void)
 {
-    // CTC mode, prescale fosc / 8
+    // CTC mode, prescale fosc / 64
 #if defined(__AVR_AT90CAN32__) || defined(__AVR_ATmega328__)
 	TCCR0A = _BV(WGM01) | _BV(CS01);
 #else
     TCCR0A = _BV(WGM01);
-    TCCR0B = _BV(CS00);
+    TCCR0B = _BV(CS01)|_BV(CS00);
 #endif
-    // we have the 8 bit timer set so that each compare match = 1ms
-    OCR0A = F_CPU / 8 / 1000;
+    // we have the 8 bit timer set so that each compare match = .1ms
+    OCR0A = F_CPU / 64 / 1000;
     // set OC interrupt 0A
     TIMSK0 = _BV(OCIE0A);
 }

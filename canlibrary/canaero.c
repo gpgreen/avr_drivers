@@ -7,6 +7,8 @@
 #ifdef CANAERODEBUG
 
 #include <stdio.h>
+#include "conversion.h"
+#include "watchdog.h"
 
 // name of driver to use in debugging printf's
 static const char* k_canaero_name = "canaero:";
