@@ -207,14 +207,14 @@ int canserial_parse_input_buffer(struct can_serial* dev, uint8_t (*count)(void),
 					consumed = i;
 					if(dev->can_log_send_message != 0)
 						dev->can_log_send_message(&dev->send_msg);
-					uint8_t status = dev->can_send_message(&dev->send_msg);
-					if (status == CAN_FAILTX
-						&& g_can_device->handle_error_fn != 0) {
+					uint8_t status = dev->can_send_message(
+                        dev->candev, &dev->send_msg);
+					if (status == CAN_FAILTX) {
 						can_error_t e;
 						e.error_code = CAN_FAILTX;
 						e.dev_buffer = 0;
 						e.dev_code = 0;
-						g_can_device->handle_error_fn(&e);
+						dev->can_handle_error(dev->candev, &e);
 					}
 					parse_state = 0;
 				}
@@ -231,14 +231,14 @@ int canserial_parse_input_buffer(struct can_serial* dev, uint8_t (*count)(void),
 					consumed = i;
 					if(dev->can_log_send_message != 0)
 						dev->can_log_send_message(&dev->send_msg);
-					uint8_t status = dev->can_send_message(&dev->send_msg);
-					if (status == CAN_FAILTX
-						&& g_can_device->handle_error_fn != 0) {
+					uint8_t status = dev->can_send_message(
+                        dev->candev, &dev->send_msg);
+					if (status == CAN_FAILTX) {
 						can_error_t e;
 						e.error_code = CAN_FAILTX;
 						e.dev_buffer = 0;
 						e.dev_code = 0;
-						g_can_device->handle_error_fn(&e);
+						dev->can_handle_error(dev->candev, &e);
 					}
 					parse_state = 0;
 				} else if ((hex_chars_to_go & 0x1) == 0)
@@ -274,7 +274,8 @@ int canserial_parse_input_buffer(struct can_serial* dev, uint8_t (*count)(void),
 					if (!serial_command) {
 						if (dev->can_log_device_command != 0)
 							dev->can_log_device_command(&dev->dev_cmd);
-						uint8_t status = dev->can_device_command(&dev->dev_cmd);
+						uint8_t status = dev->can_device_command(
+                            dev->candev, &dev->dev_cmd);
 						if (status != CAN_OK
 							&& dev->can_log_failed_device_command != 0)
 							dev->can_log_failed_device_command(&dev->dev_cmd,

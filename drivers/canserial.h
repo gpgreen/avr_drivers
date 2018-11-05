@@ -91,7 +91,9 @@ struct can_serial
 	can_msg_t send_msg;
 	/* buffer to hold can device command */
 	struct can_device_command dev_cmd;
-
+    /* the can device */
+    struct can_device* candev;
+    
 	/**** Following fn's may be 0 if not desired ****/
 
 	/* log a message received on can bus */
@@ -112,9 +114,14 @@ struct can_serial
 	/**** Following fn's must not be 0, always executed ****/
 
 	/* send a message on the can bus, returns CAN_OK or CAN_FAILTX */
-	int (*can_send_message)(const can_msg_t* msg);
+	int (*can_send_message)(struct can_device* dev,
+                            const can_msg_t* msg);
 	/* execute a can device command */
-	int (*can_device_command)(const struct can_device_command* cmd);
+	int (*can_device_command)(struct can_device* dev,
+                              const struct can_device_command* cmd);
+	/* handle can error */
+	void (*can_handle_error)(struct can_device* dev,
+                             const can_error_t* err);
 };
 
 // do a canserial command

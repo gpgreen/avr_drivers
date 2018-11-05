@@ -10,6 +10,8 @@
 ##########################################################################
 
 set(avrdrivers_SOURCES
+     spi.c
+     spi.h
      timer.c
      timer.h
      uart.c
@@ -31,8 +33,6 @@ if (AHRS_FIRMWARE)
      l3g4200d.c
      l3g4200d_def.h
      l3g4200d.h
-     spi.c
-     spi.h
      watchdog.c
      watchdog.h
      )
@@ -45,6 +45,16 @@ if (COMPASS_FIRMWARE)
     hmc5883l.h
   )
 endif(COMPASS_FIRMWARE)
+
+if (CANBUS_SHIELD_FIRMWARE)
+  list(APPEND avrdrivers_SOURCES
+    canserial.c
+    canserial.h
+    mcp2515.c
+    mcp2515_def.h
+    mcp2515.h
+    )
+endif(CANBUS_SHIELD_FIRMWARE)
 
 #   canserial.c
 #   canserial.h
@@ -64,6 +74,8 @@ endif(COMPASS_FIRMWARE)
 #   scp1000.c
 #   scp1000_def.h
 #   scp1000.h
+#   spi.c
+#   spi.h
 #   timer2.c
 #   timer2.h
 #   um6.c

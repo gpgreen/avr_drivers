@@ -27,7 +27,7 @@ option(COMPASS_FIRMWARE "build compass firmware" OFF)
 ##########################################################################
 set(AVR_UPLOADTOOL avrdude)
 set(AVR_PROGRAMMER usbtiny)
-set(AVR_UPLOADTOOL_PORT /dev/ttyUSB0)
+set(AVR_UPLOADTOOL_PORT usb)
 
 ##########################################################################
 # AVR and fuses needs to be set
@@ -35,6 +35,7 @@ set(AVR_UPLOADTOOL_PORT /dev/ttyUSB0)
 
 if (AHRS_FIRMWARE)
   set(AVR_MCU at90can32)
+  set(AVRDUDE_MCU c32)
   set(AVR_E_FUSE 0xfb)
   set(AVR_H_FUSE 0xd9)
   set(AVR_L_FUSE 0x5e)
@@ -42,10 +43,20 @@ endif(AHRS_FIRMWARE)
 
 if (COMPASS_FIRMWARE)
   set(AVR_MCU atmega644)
+  set(AVRDUDE_MCU m44)
   set(AVR_E_FUSE 0xfc)
   set(AVR_H_FUSE 0xd9)
   set(AVR_L_FUSE 0x27)
 endif(COMPASS_FIRMWARE)
+
+if (CANBUS_SHIELD_FIRMWARE)
+  set(AVR_MCU atmega328p)
+  set(AVRDUDE_MCU m328p)
+  set(AVR_E_FUSE 0xfc)
+  set(AVR_H_FUSE 0xd9)
+  set(AVR_L_FUSE 0x27)
+  set(AVR_PROGRAMMER stk500v1)
+endif(CANBUS_SHIELD_FIRMWARE)
 
 ### END TOOLCHAIN SETUP AREA #############################################
 
@@ -68,6 +79,8 @@ message(STATUS "Current programmer is: ${AVR_PROGRAMMER}")
 message(STATUS "Current upload port is: ${AVR_UPLOADTOOL_PORT}")
 message(STATUS "Current uploadtool options are: ${AVR_UPLOADTOOL_OPTIONS}")
 message(STATUS "Current MCU is set to: ${AVR_MCU}")
+message(STATUS "Current Programmer MCU is set to: ${AVRDUDE_MCU}")
+message(STATUS "Current E_FUSE is set to: ${AVR_E_FUSE}")
 message(STATUS "Current H_FUSE is set to: ${AVR_H_FUSE}")
 message(STATUS "Current L_FUSE is set to: ${AVR_L_FUSE}")
 
@@ -81,7 +94,12 @@ endif(NOT CMAKE_BUILD_TYPE)
 ##########################################################################
 # needs to be defined for AVR toolchain
 ##########################################################################
-set(MCU_SPEED "8000000UL")
+if(NOT CANBUS_SHIELD_FIRMWARE)
+  set(MCU_SPEED "8000000UL")
+endif(NOT CANBUS_SHIELD_FIRMWARE)
+if(CANBUS_SHIELD_FIRMWARE)
+  set(MCU_SPEED "16000000UL")
+endif(CANBUS_SHIELD_FIRMWARE)
 
 ##########################################################################
 # some cmake cross-compile necessities
@@ -166,6 +184,11 @@ endif(AHRS_FIRMWARE)
 if(COMPASS_FIRMWARE)
   set(PROJECT_DEF_PATH "${CMAKE_SOURCE_DIR}/../../compass")
 endif(COMPASS_FIRMWARE)
+
+# set the include path to find 'compass/def.h'
+if(CANBUS_SHIELD_FIRMWARE)
+  set(PROJECT_DEF_PATH "${CMAKE_SOURCE_DIR}/../../canbus-shield")
+endif(CANBUS_SHIELD_FIRMWARE)
 
 ##########################################################################
 # include search paths

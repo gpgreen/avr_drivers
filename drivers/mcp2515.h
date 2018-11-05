@@ -45,14 +45,8 @@
 #error "This driver requires a MCP2515_INT_VECT define to specify interrupt vector"
 #endif
 
-/* define if this is a general interrupt, where it happens any time the pin
- * changes state. This means we have to check the PINn value for a low level
- * on the interrupt, as opposed to it only happening when the level goes low
- */
-/* #define MCP2515_INT_VECT_ANY_CHANGE 1 */
-
 /* struct for mcp2515 device specific data */
-struct mcp2515_dev_priv {
+struct mcp2515_dev {
 	// set to 1 if interrupt happened, 0 if not
 	volatile uint8_t flag;
 	// capture pointer to settings
@@ -75,45 +69,52 @@ struct mcp2515_dev_priv {
 #endif
 	// GPIO pin mask for interrupt
 	uint8_t port_pin;
+
+    struct can_device* dev;
 };
 
-// device specific struct
-extern struct mcp2515_dev_priv g_mcp2515_dev_priv;
-
-// the CAN device
-extern struct can_device mcp2515_dev;
+/* define if this is a general interrupt, where it happens any time the pin
+ * changes state. This means we have to check the PINn value for a low level
+ * on the interrupt, as opposed to it only happening when the level goes low
+ */
+/* #define MCP2515_INT_VECT_ANY_CHANGE 1 */
 
 // initialize the device
-extern int mcp2515_init(can_init_t* settings);
+extern int mcp2515_init(can_init_t* settings, struct can_device* dev);
 
 // run self test on device
-extern int mcp2515_self_test(void);
+extern int mcp2515_self_test(struct can_device* dev);
 
 // have we received a msg
-extern int mcp2515_check_receive(void);
+extern int mcp2515_check_receive(struct can_device* dev);
 
 // read receive buf status (SPI command)
 //extern uint8_t mcp2515_read_rx_status(void);
 
 // find a free tx buf
-extern int mcp2515_get_next_free_tx_buf(int* txbuf_n);
+extern int mcp2515_get_next_free_tx_buf(struct can_device* dev,
+                                        int* txbuf_n);
 
 // send a can message to the device
-extern void mcp2515_write_msg(int buffer_sidh_addr, const can_msg_t* msg);
+extern void mcp2515_write_msg(struct can_device* dev,
+                              int buffer_sidh_addr,
+                              const can_msg_t* msg);
 
 // tell the device to send the message in the tx buf
 //extern void mcp2515_start_transmit(const uint8_t txbuf_n);
 
 // read a can message received by device
-extern int mcp2515_read_msg(can_msg_t* msg);
+extern int mcp2515_read_msg(struct can_device* dev, can_msg_t* msg);
 
 // called when device interrupts
-extern int mcp2515_handle_interrupt(int* status_flag);
+extern int mcp2515_handle_interrupt(struct can_device* dev,
+                                    int* status_flag);
 
 // called to get rx,tx error counts
-extern int mcp2515_error_counts(uint8_t* tx_count, uint8_t* rx_count);
+extern int mcp2515_error_counts(struct can_device* dev,
+                                uint8_t* tx_count, uint8_t* rx_count);
 
 // clear the tx buffers of any unsent messages
-extern void mcp2515_clear_tx_buffers(void);
+extern void mcp2515_clear_tx_buffers(struct can_device* dev);
 
 #endif
