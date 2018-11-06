@@ -489,15 +489,28 @@ void mcp2515_write_msg(struct can_device* dev, int txbuf_n,
 			cmd |= 0x2;
 		else if (txbuf_n == 2)
 			cmd |= 0x4;
-		spi_transfer(cmd);
+		spi_transfer(cmd);      /* CTRL */
+
+        if (p_message->idtype == CAN_STANDARD_ID)
+        {
+            // Standard ID
+            spi_transfer((uint8_t) (p_message->id>>3)); /* SIDH */
+            spi_transfer((uint8_t) (p_message->id<<5)); /* SIDL */
    
-		// Standard ID
-		spi_transfer((uint8_t) (p_message->id>>3));
-		spi_transfer((uint8_t) (p_message->id<<5));
+            // Extended ID
+            spi_transfer(0x00);     /* EID8 */
+            spi_transfer(0x00);     /* EID0 */
+        } else {
+            // Standard ID
+            spi_transfer((uint8_t)(p_message->id >> 3)); /* SIDH */
+            spi_transfer((uint8_t)(p_message->id << 5)
+                         | 0x8
+                         | (uint8_t)(0x3 & (p_message->id >> 27))); /* SIDL + EXIDE + bit 18 and 17 */
    
-		// Extended ID
-		spi_transfer(0x00);
-		spi_transfer(0x00);
+            // Extended ID
+            spi_transfer((uint8_t)(p_message->id >> 19));     /* EID15-EID8 */
+            spi_transfer((uint8_t)(p_message->id >> 11));     /* EID8-EID0 */
+        }
    
 		uint8_t length = p_message->length;
    
@@ -507,14 +520,14 @@ void mcp2515_write_msg(struct can_device* dev, int txbuf_n,
 		// is this "Remote Transmit Request" ?
 		if (p_message->rtr)
 			// data len + RTR
-			spi_transfer(_BV(MCP_RTR) | length);
+			spi_transfer(_BV(MCP_RTR) | length); /* DLC */
 		else
 			// data len
-			spi_transfer(length);
+			spi_transfer(length); /* DLC */
        
 		// Data
 		for (uint8_t i=0;i<length;i++)
-			spi_transfer(p_message->data[i]);
+			spi_transfer(p_message->data[i]); /* D1-D8 */
 
 		mcp2515_unselect();
 		
@@ -726,15 +739,24 @@ ISR(MCP2515_INT_VECT)
 		spi_transfer(cmd);
 
 		// Standard ID
-		p_message->id =  (uint16_t) spi_transfer(0xff) << 3;
+		p_message->id =  (uint16_t) spi_transfer(0xff) << 3; /* SID3-10 */
 		uint8_t data = spi_transfer(0xff);
-		p_message->id |= (uint16_t)(data >> 5);
+		p_message->id |= (uint16_t)(data >> 5); /* SID0-2, SRR, IDE, EID17-16 */
 		p_message->rtr = (data & _BV(4)) ? 1 : 0;
-   
-		// extended ID
-		spi_transfer(0xff);
-		spi_transfer(0xff);
-   
+        p_message->idtype = (data & _BV(3)) >> 3;
+        if (p_message->idtype == CAN_EXTENDED_ID)
+        {
+            // extended ID
+            spi_transfer(0xff);
+            p_message->id |= (uint32_t)(data << 11); /* EID8-EID15 */
+            spi_transfer(0xff);
+            p_message->id |= (uint32_t)(data << 19); /* EID16-EID17 */
+        } else {
+            // standard ID
+            spi_transfer(0xff);
+            spi_transfer(0xff);
+        }
+           
 		// length 
 		uint8_t length = spi_transfer(0xff) & 0x0f;
 		p_message->length = length;

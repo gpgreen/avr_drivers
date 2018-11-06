@@ -55,9 +55,18 @@ static void print_msg(const can_msg_t* msg)
 	union msg_id_bytes mid;
 	mid.id = msg->id;
 	/* the id */
-	print_nibble(mid.bytes[1]);
-	print_nibble(mid.bytes[0] >> 4);
-	print_nibble(mid.bytes[0] & 0xf);
+    if (msg->idtype == CAN_EXTENDED_ID)
+    {
+        print_byte(mid.bytes[3]);
+        print_byte(mid.bytes[2]);
+        print_byte(mid.bytes[1]);
+        print_byte(mid.bytes[0]);
+    } else {
+        print_nibble(mid.bytes[1]);
+        print_nibble(mid.bytes[0] >> 4);
+        print_nibble(mid.bytes[0] & 0xf);
+    }
+    
 	/* the length */
 	putchar('0' + msg->length);
 	/* the data */
@@ -168,14 +177,17 @@ int canserial_parse_input_buffer(struct can_serial* dev, uint8_t (*count)(void),
 			msg_seq = 0;
 			serial_command = 0;
 			if(ch == 't' || ch == 'r') {
+                // standard id CAN message
 				hex_chars_to_go = 3;
 				parse_state = 1;
 				memset(&dev->send_msg, 0, sizeof(can_msg_t));
 				dev->send_msg.rtr = (ch =='r') ? 1 : 0;
 			} else if(ch == 'T' || ch == 'R') {
+                // extended id CAN message
 				hex_chars_to_go = 8;
 				parse_state = 1;
 				memset(&dev->send_msg, 0, sizeof(can_msg_t));
+                dev->send_msg.idtype = 1;
 				dev->send_msg.rtr = (ch =='R') ? 1 : 0;
 			} else if(ch == 'D' || ch == 'c') {
 				hex_chars_to_go = 2;
