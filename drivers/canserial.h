@@ -4,6 +4,7 @@
 #include "defs.h"
 #include <inttypes.h>
 #include "can.h"
+#include "fifo.h"
 
 /*
  * format of commands and messages
@@ -128,9 +129,8 @@ struct can_serial
 extern int canserial_command(const struct can_device_command* cmd);
 
 // parse an input buffer
-extern int canserial_parse_input_buffer(struct can_serial* dev, 
-										uint8_t (*count)(void),
-										uint8_t (*getc)(void));
+extern int canserial_parse_input_buffer(struct can_serial* dev,
+                                        struct fifo* fifo);
 
 // do something with a can message received
 extern int canserial_handle_recv_message(struct can_serial* dev, 
