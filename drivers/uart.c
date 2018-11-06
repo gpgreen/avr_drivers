@@ -18,12 +18,12 @@ static volatile uint8_t error;
 
 /* Initialize UART */
 
-void uart_init()
+void uart_init(uint8_t txsz, uint8_t* txbuf, uint8_t rxsz, uint8_t* rxbuf)
 {
 	error = 0;
 
-    fifo_init(&txfifo);
-    fifo_init(&rxfifo);
+    fifo_init(&txfifo, txsz, txbuf);
+    fifo_init(&rxfifo, rxsz, rxbuf);
 
 	// set baud rate
 	_UBRRH = UBRRH_VALUE;

@@ -2,6 +2,7 @@
 #define UART_H_
 
 #include <stdio.h>
+#include <stdint.h>
 
 /* Defines needed in application programs
  * UART1 - if we are using the second serial port on the device instead
@@ -10,7 +11,8 @@
  * util/setbaud.h
  */
 
-extern void uart_init(void);		/* Initialize UART and Flush FIFOs */
+extern void uart_init(uint8_t txsz, uint8_t* txbuf,
+                      uint8_t rxsz, uint8_t* rxbuf);		/* Initialize UART and Flush FIFOs */
 extern void uart_set_baudrate(uint8_t ubrrh, uint8_t ubrrl, int use_2x); /* set new baud rate */
 extern uint8_t uart_test(void);	/* Check number of data in UART Rx FIFO */
 extern uint8_t uart_error(void);   /* returns non-zero if there was an error */
