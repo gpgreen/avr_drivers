@@ -6,7 +6,7 @@
 #include "can.h"
 
 // define to 1 if debugging
-/* #define MCPDEBUG   (1) */
+/* #define MCPDEBUG                     1 */
 
 // we need to define how big the FIFO's buffers are
 // we have a receive FIFO and an error FIFO
@@ -21,15 +21,15 @@
 #endif
 
 // return error codes
-#define MCP2515_OK      (0)
-#define MCP2515_FAIL    (1)
-#define MCP_ALLTXBUSY   (2)
+#define MCP2515_OK                      0
+#define MCP2515_FAIL                    1
+#define MCP_ALLTXBUSY                   2
 
 // we need to define the MCP clock
 // this is not the same as the CPU
 // define one of these in the board specific firmware
-/* #define MCP2515_8MHZ    (1) */
-/* #define MCP2515_16MHZ   (1) */
+/* #define MCP2515_8MHZ                 1 */
+/* #define MCP2515_16MHZ                1 */
 
 // check
 #ifndef MCP2515_8MHZ
@@ -49,6 +49,8 @@
 struct mcp2515_dev {
 	// set to 1 if interrupt happened, 0 if not
 	volatile uint8_t flag;
+    // set to 1 if device has been initialized
+    uint8_t init;
 	// capture pointer to settings
 	can_init_t* settings;
 	// interrupt control register, controlling edge detection
@@ -81,6 +83,9 @@ struct mcp2515_dev {
 
 // initialize the device
 extern int mcp2515_init(can_init_t* settings, struct can_device* dev);
+
+// re-initialize the device
+extern int mcp2515_reinit(struct can_device* dev);
 
 // run self test on device
 extern int mcp2515_self_test(struct can_device* dev);

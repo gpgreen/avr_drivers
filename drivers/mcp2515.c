@@ -155,16 +155,14 @@ int mcp2515_check_receive(struct can_device* dev)
  */
 int mcp2515_init(can_init_t* settings, struct can_device* dev)
 {
-	uint8_t cfg1, cfg2, cfg3;
-
     /* set the device in the priv structure */
     s_mcp2515_dev_p = dev->priv_dev;
+    dev->priv_dev->init = 0;
     
-    /* initialize the device structure */
-    dev->priv_dev = &s_mcp2515_dev_priv;
+    /* initialize the device structure, except for priv_dev, which should be set already */
     dev->bus_state = ERROR_ACTIVE;
     dev->init_fn = mcp2515_init;
-    dev->reinit_fn = 0;
+    dev->reinit_fn = mcp2515_reinit;
     dev->self_test_fn = mcp2515_self_test;
     dev->check_receive_fn = mcp2515_check_receive;
     dev->free_send_buffer_fn = mcp2515_get_next_free_tx_buf;
@@ -176,6 +174,24 @@ int mcp2515_init(can_init_t* settings, struct can_device* dev)
     dev->clear_tx_buffers = mcp2515_clear_tx_buffers;
     
     dev->settings = settings;
+
+    return mcp2515_reinit(dev);
+}
+
+/*
+ * Initialize the MCP2515
+ */
+int mcp2515_reinit(struct can_device* dev)
+{
+	uint8_t cfg1, cfg2, cfg3;
+
+    can_init_t* settings = dev->settings;
+    if (settings == 0)
+        return CAN_FAILINIT;
+
+    // if device has been running, clear tx buffers
+    if (dev->priv_dev->init)
+        mcp2515_clear_tx_buffers(dev);
     
 #ifdef MCPDEBUG
 	DEVICE_PRINT2("setting loopback mode:%x", settings->loopback_on);
@@ -396,13 +412,16 @@ int mcp2515_init(can_init_t* settings, struct can_device* dev)
 	_delay_ms(500);
 	
 	// CAN_INT, input, also activate the pullup resistor
-	*s_mcp2515_dev_priv.ddr_port &= ~s_mcp2515_dev_priv.port_pin;
-	*s_mcp2515_dev_priv.port |= s_mcp2515_dev_priv.port_pin;
+	*dev->dev_priv->ddr_port &= ~dev->dev_priv->port_pin;
+	*dev->dev_priv->port |= dev->dev_priv->port_pin;
 
     // setup interrupt for CAN
-	*s_mcp2515_dev_priv.int_dir_reg |= s_mcp2515_dev_priv.int_dir_mask;
-	*s_mcp2515_dev_priv.int_en_reg |= s_mcp2515_dev_priv.int_en_mask;
+	*dev->dev_priv->int_dir_reg |= dev->dev_priv->int_dir_mask;
+	*dev->dev_priv->int_en_reg |= dev->dev_priv->int_en_mask;
 
+    // set the initialized flag
+    dev->dev_priv->init = 1;
+    
 	return CAN_OK;
 }
 
@@ -413,13 +432,13 @@ int mcp2515_self_test(struct can_device* dev)
 {
 	// read the CANCTRL register, ensure that it matches setup
 	uint8_t reg = mcp2515_read_register( MCP_CANCTRL );
-	if (reg != (s_mcp2515_dev_priv.settings->loopback_on ? _BV(MCP_REQOP1) : 0))
+	if (reg != (dev->settings->loopback_on ? _BV(MCP_REQOP1) : 0))
 		return CAN_FAIL;
 	// read the CANSTAT register, ensure in normal mode
 	reg = mcp2515_read_register( MCP_CANSTAT );
 	// mask off bits other than mode (interrupts)
 	// should be in normal operation mode
-	uint8_t tstval = s_mcp2515_dev_priv.settings->loopback_on ? _BV(MCP_OPMOD1) : 0;
+	uint8_t tstval = dev->settings->loopback_on ? _BV(MCP_OPMOD1) : 0;
 	if ((reg & (_BV(MCP_OPMOD0)|_BV(MCP_OPMOD1)|_BV(MCP_OPMOD2))) != tstval)
 		return CAN_FAIL;
 	return CAN_OK;
@@ -554,8 +573,8 @@ int mcp2515_handle_interrupt(struct can_device* dev, int* status_flag)
 {
 	ATOMIC_BLOCK(ATOMIC_FORCEON)
 	{
-		*status_flag = s_mcp2515_dev_priv.flag;
-		s_mcp2515_dev_priv.flag = 0;
+		*status_flag = dev->dev_priv->flag;
+		dev->dev_priv->flag = 0;
 	}
 
 	// if flag is set, we have an interrupt
