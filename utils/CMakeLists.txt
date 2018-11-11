@@ -13,6 +13,7 @@ add_avr_library(
    avrutils
    conversion.c
    conversion.h
+   fifo.c
    fifo.h
 )
 
