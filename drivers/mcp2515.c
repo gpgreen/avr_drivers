@@ -399,7 +399,8 @@ int mcp2515_reinit(struct can_device* dev)
 
 	// delay a long time to allow clock to stabilize
 	_delay_ms(500);
-	
+
+    struct mcp2515_dev* pdev = ((struct mcp2515_dev*)dev->priv_dev);
 	// CAN_INT, input, also activate the pullup resistor
 	*pdev->ddr_port &= ~pdev->port_pin;
 	*pdev->port |= pdev->port_pin;

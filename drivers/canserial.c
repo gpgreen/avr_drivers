@@ -164,8 +164,8 @@ int canserial_parse_input_buffer(struct can_serial* dev, struct fifo* ififo)
 	int i=0;
 	while(fifo_count(ififo)) {
 		uint8_t ch;
-        if (fifo_get_unsafe(ififo, &ch) == FIFO_EMPTY)
-            return consumed;    /* should never happen, because of while loop test */
+        if(fifo_get_unsafe(ififo, &ch) == FIFO_EMPTY)
+            break;
 		i++;
 #ifdef CANSERIALDEBUG
 		printf("i:%d ch:0x%x p:%d hc:%d m:%d c:%d\n", i, (unsigned char)ch,

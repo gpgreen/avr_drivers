@@ -56,19 +56,15 @@ inline uint8_t fifo_count (struct fifo* fifo)
  */
 inline void fifo_put_safe(struct fifo* fifo, uint8_t c)
 {
-	uint8_t i;
-
-	i = fifo->idx_w;
 	while (fifo->count >= fifo->bufsize)
         ;
-	fifo->buf[i++] = c;
 	ATOMIC_BLOCK(ATOMIC_FORCEON) 
 	{
+        fifo->buf[fifo->idx_w] = c;
 		++fifo->count;
+        if (++fifo->idx_w >= fifo->bufsize)
+            fifo->idx_w = 0;
 	}
-	if (i >= fifo->bufsize)
-		i = 0;
-	fifo->idx_w = i;
 }
 
 /*
@@ -102,19 +98,17 @@ inline int fifo_put_unsafe(struct fifo* fifo, uint8_t c)
  */
 inline uint8_t fifo_get_safe(struct fifo* fifo)
 {
-	uint8_t d, i;
+	uint8_t d;
 
-	i = fifo->idx_r;
 	while (fifo->count == 0)
         ;
-	d = fifo->buf[i++];
 	ATOMIC_BLOCK(ATOMIC_FORCEON) 
 	{
+        d = fifo->buf[fifo->idx_r];
 		--fifo->count;
+        if (++fifo->idx_r >= fifo->bufsize)
+            fifo->idx_r = 0;
 	}
-	if (i >= fifo->bufsize)
-		i = 0;
-	fifo->idx_r = i;
 
 	return d;
 }
