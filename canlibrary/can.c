@@ -40,7 +40,7 @@ int can_init(can_init_t* settings, struct can_device* dev)
 	PDEBUG("can init");
 
     dev->settings = settings;
-
+    dev->bus_state = OK;
 	return dev->init_fn(settings, dev);
 }
 

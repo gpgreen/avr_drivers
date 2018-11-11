@@ -1,14 +1,13 @@
 #ifndef DRIVER_H_
 #define DRIVER_H_
 
-#include <stdio.h>
-
 #ifdef __AVR
 
 #include <avr/pgmspace.h>
+extern void uart_printf_P(const char* str, ...);
 
-#define DEVICE_PRINT(MSG) (printf_P(PSTR("%s" MSG "\n"), k_name))
-#define DEVICE_PRINT2(MSG, ...) (printf_P(PSTR("%s" MSG "\n"), k_name, __VA_ARGS__))
+#define DEVICE_PRINT(MSG) (uart_printf_P(PSTR("%s" MSG "\n"), k_name))
+#define DEVICE_PRINT2(MSG, ...) (uart_printf_P(PSTR("%s" MSG "\n"), k_name, __VA_ARGS__))
 
 #else
 

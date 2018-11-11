@@ -14,8 +14,6 @@ int canserial_handle_recv_message(struct can_serial* dev, const can_msg_t* msg)
 /* canserial command */
 int canserial_command(const struct can_device_command* cmd)
 {
-	uint32_t baud_rate;
-	
 	if (cmd->length > CAN_DEVICE_CMD_MAX_DATA)
 		return CANSERIAL_CMD_TOO_LONG;
 	if (cmd->command == 0) {
@@ -154,8 +152,7 @@ static int parse_id_hexdecimal(uint8_t ch, uint32_t* val)
  *
  * Look for the constructs in the input buffer, execute them
  */
-int canserial_parse_input_buffer(struct can_serial* dev, uint8_t (*count)(void),
-								 uint8_t (*get)(void))
+int canserial_parse_input_buffer(struct can_serial* dev, struct fifo* ififo)
 {
 	int parse_state = 0;
 	int hex_chars_to_go = 0;
@@ -165,8 +162,10 @@ int canserial_parse_input_buffer(struct can_serial* dev, uint8_t (*count)(void),
 	
 	// iterate through the buffer
 	int i=0;
-	while(count()) {
-		uint8_t ch = get();
+	while(fifo_count(ififo)) {
+		uint8_t ch;
+        if (fifo_get_unsafe(ififo, &ch) == FIFO_EMPTY)
+            return consumed;    /* should never happen, because of while loop test */
 		i++;
 #ifdef CANSERIALDEBUG
 		printf("i:%d ch:0x%x p:%d hc:%d m:%d c:%d\n", i, (unsigned char)ch,

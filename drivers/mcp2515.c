@@ -21,7 +21,7 @@
 static const char* k_name = "mcp2515:";
 
 // device specific struct
-static struct mcp2515_dev_priv* s_mcp2515_dev_p;
+static struct mcp2515_dev* s_mcp2515_pdev;
 
 // define a fifo for received messages
 // messages are added in the ISR, read on demand
@@ -156,22 +156,8 @@ int mcp2515_check_receive(struct can_device* dev)
 int mcp2515_init(can_init_t* settings, struct can_device* dev)
 {
     /* set the device in the priv structure */
-    s_mcp2515_dev_p = dev->priv_dev;
-    dev->priv_dev->init = 0;
-    
-    /* initialize the device structure, except for priv_dev, which should be set already */
-    dev->bus_state = ERROR_ACTIVE;
-    dev->init_fn = mcp2515_init;
-    dev->reinit_fn = mcp2515_reinit;
-    dev->self_test_fn = mcp2515_self_test;
-    dev->check_receive_fn = mcp2515_check_receive;
-    dev->free_send_buffer_fn = mcp2515_get_next_free_tx_buf;
-    dev->write_msg_fn = mcp2515_write_msg;
-    dev->read_msg_fn = mcp2515_read_msg;
-    dev->device_command = 0;
-    dev->handle_int_fn = mcp2515_handle_interrupt;
-    dev->error_counts = mcp2515_error_counts;
-    dev->clear_tx_buffers = mcp2515_clear_tx_buffers;
+    s_mcp2515_pdev = dev->priv_dev;
+    s_mcp2515_pdev->init = 0;
     
     dev->settings = settings;
 
@@ -189,9 +175,12 @@ int mcp2515_reinit(struct can_device* dev)
     if (settings == 0)
         return CAN_FAILINIT;
 
+    struct mcp2515_dev* pdev = ((struct mcp2515_dev*)dev->priv_dev);
+    
     // if device has been running, clear tx buffers
-    if (dev->priv_dev->init)
+    if (pdev->init)
         mcp2515_clear_tx_buffers(dev);
+    pdev->init = 0;
     
 #ifdef MCPDEBUG
 	DEVICE_PRINT2("setting loopback mode:%x", settings->loopback_on);
@@ -412,15 +401,15 @@ int mcp2515_reinit(struct can_device* dev)
 	_delay_ms(500);
 	
 	// CAN_INT, input, also activate the pullup resistor
-	*dev->dev_priv->ddr_port &= ~dev->dev_priv->port_pin;
-	*dev->dev_priv->port |= dev->dev_priv->port_pin;
+	*pdev->ddr_port &= ~pdev->port_pin;
+	*pdev->port |= pdev->port_pin;
 
     // setup interrupt for CAN
-	*dev->dev_priv->int_dir_reg |= dev->dev_priv->int_dir_mask;
-	*dev->dev_priv->int_en_reg |= dev->dev_priv->int_en_mask;
+	*pdev->int_dir_reg |= pdev->int_dir_mask;
+	*pdev->int_en_reg |= pdev->int_en_mask;
 
     // set the initialized flag
-    dev->dev_priv->init = 1;
+    pdev->init = 1;
     
 	return CAN_OK;
 }
@@ -584,10 +573,11 @@ int mcp2515_read_msg(struct can_device* dev, can_msg_t *p_message)
  */
 int mcp2515_handle_interrupt(struct can_device* dev, int* status_flag)
 {
+    struct mcp2515_dev* pdev = ((struct mcp2515_dev*)dev->priv_dev);
 	ATOMIC_BLOCK(ATOMIC_FORCEON)
 	{
-		*status_flag = dev->dev_priv->flag;
-		dev->dev_priv->flag = 0;
+		*status_flag = pdev->flag;
+		pdev->flag = 0;
 	}
 
 	// if flag is set, we have an interrupt
@@ -693,12 +683,12 @@ ISR(MCP2515_INT_VECT)
 	
 #if defined(MCP2515_INT_VECT_ANY_CHANGE)
 	// see if can interrupt pin is lo, ie we got a falling edge
-	if (bit_is_clear(*s_mcp2515_dev_priv.pin, s_mcp2515_dev_priv.port_pin))
-		s_mcp2515_dev_priv.flag = 1;
+	if (bit_is_clear(*s_mcp2515_pdev->pin, s_mcp2515_pdev->port_pin))
+		s_mcp2515_pdev->flag = 1;
 	else
 		return;
 #else
-	s_mcp2515_dev_priv.flag = 1;
+	s_mcp2515_pdev->flag = 1;
 #endif
 
 	// read interrupt flag register
@@ -748,9 +738,9 @@ ISR(MCP2515_INT_VECT)
         {
             // extended ID
             spi_transfer(0xff);
-            p_message->id |= (uint32_t)(data << 11); /* EID8-EID15 */
+            p_message->id |= (uint32_t)data << 11; /* EID8-EID15 */
             spi_transfer(0xff);
-            p_message->id |= (uint32_t)(data << 19); /* EID16-EID17 */
+            p_message->id |= (uint32_t)data << 19; /* EID16-EID17 */
         } else {
             // standard ID
             spi_transfer(0xff);
@@ -804,12 +794,12 @@ after_recv:
 			p_err->error_code = CAN_BUS_OFF;
 			p_err->dev_buffer = 0;
 			// if already bus off, then now error-active
-			if (s_mcp2515_dev_priv.dev->bus_state == BUS_OFF) {
-				s_mcp2515_dev_priv.dev->bus_state = ERROR_ACTIVE;
+			if (s_mcp2515_pdev->dev->bus_state == BUS_OFF) {
+				s_mcp2515_pdev->dev->bus_state = ERROR_ACTIVE;
 				p_err->dev_code = 0;
 			} else {
 				// bus off state
-				s_mcp2515_dev_priv.dev->bus_state = BUS_OFF;
+				s_mcp2515_pdev->dev->bus_state = BUS_OFF;
 				p_err->dev_code = 1;
 			}
 			// error-passive TX or RX
@@ -817,12 +807,12 @@ after_recv:
 			p_err->error_code = CAN_BUS_PASSIVE;
 			p_err->dev_buffer = 0;
 			// if already error-passive, then now error-active
-			if (s_mcp2515_dev_priv.dev->bus_state == ERROR_PASSIVE) {
-				s_mcp2515_dev_priv.dev->bus_state = ERROR_ACTIVE;
+			if (s_mcp2515_pdev->dev->bus_state == ERROR_PASSIVE) {
+				s_mcp2515_pdev->dev->bus_state = ERROR_ACTIVE;
 				p_err->dev_code = 0;
 			} else {
 				// bus off state
-				s_mcp2515_dev_priv.dev->bus_state = ERROR_PASSIVE;
+				s_mcp2515_pdev->dev->bus_state = ERROR_PASSIVE;
 				p_err->dev_code = 1;
 			}
 			// error warning
