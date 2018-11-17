@@ -76,7 +76,7 @@ static void print_msg(const can_msg_t* msg)
 void log_send(const can_msg_t* msg)
 {
 	putchar('=');
-	putchar('t');
+	putchar(msg->idtype == CAN_EXTENDED_ID ? 'T' : 't');
 	print_msg(msg);
 	putchar('\n');
 }
@@ -85,7 +85,7 @@ void log_send(const can_msg_t* msg)
 void log_recv(const can_msg_t* msg)
 {
 	/* received can message */
-	putchar('t');
+	putchar(msg->idtype == CAN_EXTENDED_ID ? 'T' : 't');
 	print_msg(msg);
 	putchar('\n');
 }
