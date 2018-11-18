@@ -14,6 +14,8 @@ set(avrdrivers_SOURCES
      spi.h
      timer.c
      timer.h
+     timer1.c
+     timer1.h
      uart.c
      uart_def.h
      uart.h
