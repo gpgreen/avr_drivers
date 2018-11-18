@@ -33,6 +33,8 @@ set(AVR_UPLOADTOOL_PORT usb)
 # AVR and fuses needs to be set
 ##########################################################################
 
+set(AVR_USE_E_FUSE on)
+
 if (AHRS_FIRMWARE)
   set(AVR_MCU at90can32)
   set(AVRDUDE_MCU c32)
@@ -80,6 +82,7 @@ message(STATUS "Current upload port is: ${AVR_UPLOADTOOL_PORT}")
 message(STATUS "Current uploadtool options are: ${AVR_UPLOADTOOL_OPTIONS}")
 message(STATUS "Current MCU is set to: ${AVR_MCU}")
 message(STATUS "Current Programmer MCU is set to: ${AVRDUDE_MCU}")
+message(STATUS "Current use E fuse is set to: ${AVR_USE_E_FUSE}")
 message(STATUS "Current E_FUSE is set to: ${AVR_E_FUSE}")
 message(STATUS "Current H_FUSE is set to: ${AVR_H_FUSE}")
 message(STATUS "Current L_FUSE is set to: ${AVR_L_FUSE}")
@@ -94,12 +97,15 @@ endif(NOT CMAKE_BUILD_TYPE)
 ##########################################################################
 # needs to be defined for AVR toolchain
 ##########################################################################
-if(NOT CANBUS_SHIELD_FIRMWARE)
+
+if(AHRS_FIRMWARE)
   set(MCU_SPEED "8000000UL")
-endif(NOT CANBUS_SHIELD_FIRMWARE)
+endif(AHRS_FIRMWARE)
+
 if(COMPASS_FIRMWARE)
   set(MCU_SPEED "16000000UL")
 endif(COMPASS_FIRMWARE)
+
 if(CANBUS_SHIELD_FIRMWARE)
   set(MCU_SPEED "16000000UL")
 endif(CANBUS_SHIELD_FIRMWARE)
