@@ -54,9 +54,9 @@
 #define CAN_TX_TIMEOUT_MS          2
 #define CAN_TX_TIMEOUT_MS_SZ       2
 
-enum can_bus_state {
+typedef enum can_bus_state {
     OK, ERROR_ACTIVE, ERROR_PASSIVE, BUS_OFF 
-};
+} canbus_state_t;
 
 // type defines for message id types
 #define CAN_STANDARD_ID                 0

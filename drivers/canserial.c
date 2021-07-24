@@ -180,13 +180,14 @@ int canserial_parse_input_buffer(struct can_serial* dev, struct fifo* ififo)
 				hex_chars_to_go = 3;
 				parse_state = 1;
 				memset(&dev->send_msg, 0, sizeof(can_msg_t));
+                dev->send_msg.idtype = CAN_STANDARD_ID;
 				dev->send_msg.rtr = (ch =='r') ? 1 : 0;
 			} else if(ch == 'T' || ch == 'R') {
                 // extended id CAN message
 				hex_chars_to_go = 8;
 				parse_state = 1;
 				memset(&dev->send_msg, 0, sizeof(can_msg_t));
-                dev->send_msg.idtype = 1;
+                dev->send_msg.idtype = CAN_EXTENDED_ID;
 				dev->send_msg.rtr = (ch =='R') ? 1 : 0;
 			} else if(ch == 'D' || ch == 'c') {
 				hex_chars_to_go = 2;

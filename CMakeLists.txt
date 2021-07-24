@@ -17,6 +17,9 @@ option(AHRS_FIRMWARE "build ahrs firmware" OFF)
 # build for the 'compass' firmware
 option(COMPASS_FIRMWARE "build compass firmware" OFF)
 
+# build for the 'compass' firmware
+option(PYPILOT_CONTROLLER_FIRMWARE "build pypilot-controller firmware" OFF)
+
 ### TOOLCHAIN SETUP AREA #################################################
 # Set any variables used in the toolchain prior project() call. In that
 # case they are already set and used.
@@ -59,6 +62,15 @@ if (CANBUS_SHIELD_FIRMWARE)
   set(AVR_L_FUSE 0x27)
   set(AVR_PROGRAMMER stk500v1)
 endif(CANBUS_SHIELD_FIRMWARE)
+
+if (PYPILOT_CONTROLLER_FIRMWARE)
+  set(AVR_MCU atmega328p)
+  set(AVRDUDE_MCU m328p)
+  set(AVR_E_FUSE 0xfc)
+  set(AVR_H_FUSE 0xd9)
+  set(AVR_L_FUSE 0x27)
+  set(AVR_PROGRAMMER stk500v1)
+endif(PYPILOT_CONTROLLER_FIRMWARE)
 
 ### END TOOLCHAIN SETUP AREA #############################################
 
@@ -109,6 +121,10 @@ endif(COMPASS_FIRMWARE)
 if(CANBUS_SHIELD_FIRMWARE)
   set(MCU_SPEED "16000000UL")
 endif(CANBUS_SHIELD_FIRMWARE)
+
+if(PYPILOT_CONTROLLER_FIRMWARE)
+  set(MCU_SPEED "16000000UL")
+endif(PYPILOT_CONTROLLER_FIRMWARE)
 
 ##########################################################################
 # some cmake cross-compile necessities
@@ -198,6 +214,11 @@ endif(COMPASS_FIRMWARE)
 if(CANBUS_SHIELD_FIRMWARE)
   set(PROJECT_DEF_PATH "${CMAKE_SOURCE_DIR}/../../canbus-shield")
 endif(CANBUS_SHIELD_FIRMWARE)
+
+# set the include path to find 'pypilot-controller/def.h'
+if(PYPILOT_CONTROLLER_FIRMWARE)
+  set(PROJECT_DEF_PATH "${CMAKE_SOURCE_DIR}/../../pypilot-controller")
+endif(PYPILOT_CONTROLLER_FIRMWARE)
 
 ##########################################################################
 # include search paths
