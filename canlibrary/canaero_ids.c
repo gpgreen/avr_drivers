@@ -8,7 +8,7 @@ void
 canaero_get_ids_data(can_msg_t *msg)
 {
 	msg->data[4] = HARDWARE_REVISION;
-	msg->data[5] = SOFTWARE_REVISION;
+	msg->data[5] = (APP_VERSION_MAJOR << 4) | (APP_VERSION_MINOR & 0xF);
 	msg->data[6] = 0;			/* CAN-aerospace standard distribution */
 	msg->data[7] = 0;			/* CAN-aerospace standard header */
 }
