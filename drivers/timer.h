@@ -4,6 +4,9 @@
 #include "defs.h"
 #include <inttypes.h>
 
+// can define USE_TIMER2_JIFFIES to use Timer2 instead of Timer0
+// #define USE_TIMER2_JIFFIES = 1
+
 extern volatile uint32_t jiffies;
 
 // initialize the timer hardware

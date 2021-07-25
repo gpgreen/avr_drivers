@@ -404,9 +404,9 @@ int mcp2515_reinit(struct can_device* dev)
 	*pdev->ddr_port &= ~pdev->port_pin;
 	*pdev->port |= pdev->port_pin;
 
-    // setup interrupt for CAN
-	*pdev->int_dir_reg |= pdev->int_dir_mask;
-	*pdev->int_en_reg |= pdev->int_en_mask;
+    // setup interrupt for CAN, either INT0/1 or pcint0/1/2
+	*pdev->int_dir_reg |= pdev->int_dir_mask; // for pcinto0/1/2 or direction of INT0/1
+	*pdev->int_en_reg |= pdev->int_en_mask; // enabled the interrupt
 
     // set the initialized flag
     pdev->init = 1;

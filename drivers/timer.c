@@ -7,6 +7,12 @@
 
 volatile uint32_t jiffies;
 
+#if defined(USE_TIMER2_JIFFIES)
+ISR(TIMER2_COMPA_vect)
+{
+    ++jiffies;
+}
+#else
 /*
  * Timer compare output 0A interrupt
  */
@@ -18,6 +24,7 @@ ISR(TIMER0_COMPA_vect)
 {
 	++jiffies;
 }
+#endif
 
 // timer_init
 //
@@ -25,6 +32,15 @@ ISR(TIMER0_COMPA_vect)
 // or 100 usecs per unit
 void timer_init(void)
 {
+#if defined(USE_TIMER2_JIFFIES)
+    // CTC mode, prescale fosc / 64
+    TCCR2A = _BV(WGM21);
+    TCCR2B = _BV(FOC2A)|_BV(CS22);
+    // each compare match = .1ms
+    OCR2A = F_CPU / 64 / 1000;
+    // set OC2A interrupt
+    TIMSK2 = _BV(OCIE2A);
+#else
     // CTC mode, prescale fosc / 64
 #if defined(__AVR_AT90CAN32__) || defined(__AVR_ATmega328__)
 	TCCR0A = _BV(WGM01) | _BV(CS01);
@@ -36,6 +52,7 @@ void timer_init(void)
     OCR0A = F_CPU / 64 / 1000;
     // set OC interrupt 0A
     TIMSK0 = _BV(OCIE0A);
+#endif
 }
 
 // jiffie

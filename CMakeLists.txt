@@ -123,7 +123,7 @@ if(CANBUS_SHIELD_FIRMWARE)
 endif(CANBUS_SHIELD_FIRMWARE)
 
 if(PYPILOT_CONTROLLER_FIRMWARE)
-  set(MCU_SPEED "16000000UL")
+  set(MCU_SPEED "8000000UL")
 endif(PYPILOT_CONTROLLER_FIRMWARE)
 
 ##########################################################################

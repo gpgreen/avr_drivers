@@ -16,6 +16,20 @@ static struct fifo txfifo, rxfifo;
 
 static volatile uint8_t error;
 
+static volatile uint8_t WRITE_FIFO_OVERFLOW;
+static volatile uint8_t READ_FIFO_OVERFLOW;
+
+/* check fifo's for overflow */
+int uart_write_fifo_ovf(void) 
+{
+    return WRITE_FIFO_OVERFLOW;
+}
+
+int uart_read_fifo_ovf(void) 
+{
+    return READ_FIFO_OVERFLOW;
+}
+
 /* Initialize UART */
 
 void uart_init(uint8_t txsz, uint8_t* txbuf, uint8_t rxsz, uint8_t* rxbuf)
@@ -24,7 +38,8 @@ void uart_init(uint8_t txsz, uint8_t* txbuf, uint8_t rxsz, uint8_t* rxbuf)
 
     fifo_init(&txfifo, txsz, txbuf);
     fifo_init(&rxfifo, rxsz, rxbuf);
-
+    WRITE_FIFO_OVERFLOW = READ_FIFO_OVERFLOW = 0;
+    
 	// set baud rate
 	_UBRRH = UBRRH_VALUE;
 	_UBRRL = UBRRL_VALUE;
@@ -90,11 +105,36 @@ int uart_putchar(char c, FILE* unused)
 	return 0;
 }
 
+int uart_putchar_unblocking(char c)
+{
+    if (WRITE_FIFO_OVERFLOW)
+        return 0;
+    if (fifo_put_safe_unblocking(&txfifo, c) == FIFO_OK) {
+        // turn on the data register empty interrupt, this will load
+        // char into the hardware
+        _UCSRB |= _BV(_UDRIE);
+        return 0xFF;
+    } else {
+        WRITE_FIFO_OVERFLOW = 0xff;
+        return 0;
+    }
+}
+
 int uart_getchar(FILE* stream)
 {
     while(fifo_count(&rxfifo) == 0)
         ;
     return fifo_get_safe(&rxfifo);
+}
+
+
+int uart_getchar_unblocking(uint8_t* c)
+{
+    if (READ_FIFO_OVERFLOW)
+        return 0;
+    if (fifo_get_safe_unblocking(&rxfifo, c) == FIFO_OK)
+        return 0xFF;
+    return 0;
 }
 
 
@@ -112,8 +152,14 @@ ISR(USART0_RX_vect)
 #endif
 #endif
 {
+    if (READ_FIFO_OVERFLOW)
+        return;
+    
     uint8_t byte = _UDR;
-	fifo_put_unsafe(&rxfifo, byte);
+
+    if (fifo_put_unsafe(&rxfifo, byte) == FIFO_FULL)
+        READ_FIFO_OVERFLOW = 0xff;
+
 	// check for errors
 	uint8_t d = _UCSRA;
 	if (d & (_BV(_FE)|_BV(_DOR)|_BV(_UPE)))

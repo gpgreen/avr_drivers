@@ -20,7 +20,7 @@ enum timer1_scaling{
 // Initialization structure for Timer1
 // Only 1 of the compare callbacks can
 // be used at a time, so compareA_val or
-// compareB_val should be zere, ie not used
+// compareB_val should be zero, ie not used
 // the corresponding callback needs to be
 // non-NULL for the timer to work
 typedef struct

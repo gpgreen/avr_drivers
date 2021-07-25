@@ -68,6 +68,27 @@ inline void fifo_put_safe(struct fifo* fifo, uint8_t c)
 }
 
 /*
+ * fifo_put_safe_unblocking
+ * place a byte in the fifo. Returns whether fifo was full or not
+ * Safe to use with only 1 concurrent reader or writer.
+ */
+inline uint8_t fifo_put_safe_unblocking(struct fifo* fifo, uint8_t c)
+{
+    uint8_t retval = FIFO_FULL;
+	ATOMIC_BLOCK(ATOMIC_FORCEON) 
+	{
+        if (fifo->count < fifo->bufsize) {
+            fifo->buf[fifo->idx_w] = c;
+            ++fifo->count;
+            if (++fifo->idx_w >= fifo->bufsize)
+                fifo->idx_w = 0;
+            retval = FIFO_OK;
+        }
+	}
+    return retval;
+}
+
+/*
  * fifo_put_unsafe
  * place a byte in the fifo. 
  * Intended to be used when interrupts are already disabled
@@ -111,6 +132,30 @@ inline uint8_t fifo_get_safe(struct fifo* fifo)
 	}
 
 	return d;
+}
+
+/*
+ * fifo_get_safe_unblocking
+ * get a byte from the fifo
+ * safe to use with only 1 concurrent reader and writer.
+ * Returns true if byte retrieved, false if not
+ */
+inline uint8_t fifo_get_safe_unblocking(struct fifo* fifo, uint8_t *ch)
+{
+    uint8_t retval = FIFO_FULL;
+	ATOMIC_BLOCK(ATOMIC_FORCEON) 
+	{
+        if (fifo->count != 0)
+        {
+            *ch = fifo->buf[fifo->idx_r];
+            --fifo->count;
+            if (++fifo->idx_r >= fifo->bufsize)
+                fifo->idx_r = 0;
+            retval = FIFO_OK;
+        }
+	}
+
+	return retval;
 }
 
 /*
