@@ -91,6 +91,7 @@ void watchdog_print_flags()
 
 /* reset the watchdog */
 
+inline
 void watchdog_reset ()
 {
 	wdt_reset();

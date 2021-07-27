@@ -142,7 +142,7 @@ inline uint8_t fifo_get_safe(struct fifo* fifo)
  */
 inline uint8_t fifo_get_safe_unblocking(struct fifo* fifo, uint8_t *ch)
 {
-    uint8_t retval = FIFO_FULL;
+    uint8_t retval = FIFO_EMPTY;
 	ATOMIC_BLOCK(ATOMIC_FORCEON) 
 	{
         if (fifo->count != 0)
