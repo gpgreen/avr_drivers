@@ -1,4 +1,5 @@
 #include <avr/io.h>
+#include <avr/wdt.h>
 #include <util/delay.h>
 #include <util/atomic.h>
 #include <string.h>
@@ -397,9 +398,14 @@ int mcp2515_reinit(struct can_device* dev)
     // Device to normal mode (or loopback)
 	mcp2515_write_register( MCP_CANCTRL, (settings->loopback_on ? _BV(MCP_REQOP1) : 0) );
 
-	// delay a long time to allow clock to stabilize
-	_delay_ms(500);
-
+	// delay a long time to allow clock to stabilize, when first started
+    if (pdev->init == 0)
+    {
+        wdt_reset();
+        _delay_ms(100);
+        wdt_reset();
+    }
+    
 	// CAN_INT, input, also activate the pullup resistor
 	*pdev->ddr_port &= ~pdev->port_pin;
 	*pdev->port |= pdev->port_pin;
@@ -426,7 +432,7 @@ int mcp2515_self_test(struct can_device* dev)
 	// read the CANSTAT register, ensure in normal mode
 	reg = mcp2515_read_register( MCP_CANSTAT );
 	// mask off bits other than mode (interrupts)
-	// should be in normal operation mode
+	// should be in normal operation mode (or loopback mode if selected)
 	uint8_t tstval = dev->settings->loopback_on ? _BV(MCP_OPMOD1) : 0;
 	if ((reg & (_BV(MCP_OPMOD0)|_BV(MCP_OPMOD1)|_BV(MCP_OPMOD2))) != tstval)
 		return CAN_FAIL;
