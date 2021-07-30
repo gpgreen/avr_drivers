@@ -2,7 +2,7 @@
 #define CANAERO_H_
 
 #include "defs.h"
-#include <inttypes.h>
+#include <stdint.h>
 #include "can.h"
 #include "canaero_defs.h"
 

@@ -2,7 +2,7 @@
 #define UART_H_
 
 #include <stdio.h>
-#include <inttypes.h>
+#include <stdint.h>
 
 /* Defines needed in application programs
  * UART1 - if we are using the second serial port on the device instead

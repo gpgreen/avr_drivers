@@ -2,7 +2,7 @@
 #define TIMER2_H_
 
 #include "defs.h"
-#include <inttypes.h>
+#include <stdint.h>
 
 // state of the timer, used internally
 enum TimerState {Idle, Active, Done};

@@ -1,7 +1,7 @@
 #ifndef L3G4200D_H_
 #define L3G4200D_H_
 
-#include <inttypes.h>
+#include <stdint.h>
 
 // define to 1 if debugging
 /* #define L3G4200DDEBUG   (1) */

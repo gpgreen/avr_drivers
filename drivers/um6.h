@@ -2,7 +2,7 @@
 #define UM6_H_
 
 #include "defs.h"
-#include <inttypes.h>
+#include <stdint.h>
 
 // define to 1 if debugging
 /* #define UM6DEBUG   (1) */

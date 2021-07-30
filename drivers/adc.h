@@ -1,7 +1,7 @@
 #ifndef ADC_H_
 #define ADC_H_
 
-#include <inttypes.h>
+#include <stdint.h>
 
 // uncomment to allow printing to serial port for debugging
 /* #define ADCDEBUG 1 */

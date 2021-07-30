@@ -2,7 +2,7 @@
 #define CAN_H_
 
 #include "defs.h"
-#include <inttypes.h>
+#include <stdint.h>
 
 // uncomment for debugging
 //#define CANDEBUG       1

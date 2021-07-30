@@ -2,7 +2,7 @@
 #define AT90CAN_H_
 
 #include "defs.h"
-#include <inttypes.h>
+#include <stdint.h>
 #include "can.h"
 
 // define to 1 if debugging

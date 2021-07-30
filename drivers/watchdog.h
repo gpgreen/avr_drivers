@@ -1,7 +1,7 @@
 #ifndef WATCHDOG_H_
 #define WATCHDOG_H_
 
-#include <inttypes.h>
+#include <stdint.h>
 #include <avr/wdt.h>
 
 // reset source flags

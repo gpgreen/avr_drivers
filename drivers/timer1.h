@@ -1,7 +1,7 @@
 #ifndef TIMER1_H_
 #define TIMER1_H_
 
-#include <inttypes.h>
+#include <stdint.h>
 
 typedef void (*timer1_compare_cb)(void);
 

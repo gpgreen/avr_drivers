@@ -1,7 +1,7 @@
 #ifndef PCA9545_H_
 #define PCA9545_H_
 
-#include <inttypes.h>
+#include <stdint.h>
 
 // define to 1 if debugging
 /* #define PCA9545DEBUG   (1) */

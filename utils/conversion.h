@@ -2,7 +2,7 @@
 #define CONVERSION_H_
 
 #include "defs.h"
-#include <inttypes.h>
+#include <stdint.h>
 
 /*-----------------------------------------------------------------------*/
 

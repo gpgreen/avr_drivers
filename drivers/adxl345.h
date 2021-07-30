@@ -1,7 +1,7 @@
 #ifndef ADXL345_H_
 #define ADXL345_H_
 
-#include <inttypes.h>
+#include <stdint.h>
 
 // define to debug device to uart
 // #define ADXL345DEBUG (1)

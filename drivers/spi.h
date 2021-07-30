@@ -2,7 +2,7 @@
 #define SPI_H_
 
 #include "defs.h"
-#include <inttypes.h>
+#include <stdint.h>
 #include <avr/io.h>
 
 #define SPI_OK 0

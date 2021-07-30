@@ -1,7 +1,7 @@
 #ifndef HMC5883L_H_
 #define HMC5883L_H_
 
-#include <inttypes.h>
+#include <stdint.h>
 
 // define to 1 if debugging
 /* #define HMCDEBUG   (1) */
