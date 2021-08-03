@@ -9,14 +9,6 @@
 #include "globals.h"
 #include "driver.h"
 
-// define the following to debug SPI comm's
-// note that defining this causes hangs as
-// it tries to write to serial port and
-// interrupts are disabled sometimes, so
-// this is not much use
-// ----------------------------------------
-/* #define MCPSPIDEBUG 1 */
-
 // globals
 
 static const char* k_name = "mcp2515:";
@@ -65,8 +57,6 @@ static int mcp2515_read_status(void)
 	mcp2515_select();
 	spi_transfer(MCP_SPI_READ_STATUS);
 	uint8_t status = spi_transfer(0xff);
-	// repeat the status 2nd byte
-	spi_transfer(0xff);
 	mcp2515_unselect();
 	return status;
 }
@@ -76,19 +66,11 @@ static int mcp2515_read_status(void)
  */
 static void mcp2515_write_register( uint8_t address, uint8_t data )
 {
-#ifdef MCPSPIDEBUG
-	DEVICE_PRINT2("write_register:%x,%x", address, data);
-#endif
-
 	mcp2515_select();
     spi_transfer(MCP_SPI_WRITE);
     spi_transfer(address);
     spi_transfer(data);
 	mcp2515_unselect();
-	
-#ifdef MCPSPIDEBUG
-	DEVICE_PRINT("done write_register");
-#endif
 }
 
 /*
@@ -96,18 +78,11 @@ static void mcp2515_write_register( uint8_t address, uint8_t data )
  */
 static uint8_t mcp2515_read_register(uint8_t address)
 {
-#ifdef MCPSPIDEBUG
-	DEVICE_PRINT2("read_register:%x", address);
-#endif
 	mcp2515_select();
     spi_transfer(MCP_SPI_READ);
     spi_transfer(address);
     uint8_t data = spi_transfer(0xff);
 	mcp2515_unselect();
-	
-#ifdef MCPSPIDEBUG
-	DEVICE_PRINT2("done read_register:%x", data);
-#endif   
     return data;
 }
 
@@ -116,20 +91,12 @@ static uint8_t mcp2515_read_register(uint8_t address)
  */
 static void mcp2515_bit_modify(uint8_t address, uint8_t mask, uint8_t data)
 {
-#ifdef MCPSPIDEBUG
-	DEVICE_PRINT2("bit_modify:%x,%x,%x", address, mask, data);
-#endif
-
 	mcp2515_select();
     spi_transfer(MCP_SPI_BIT_MOD);
     spi_transfer(address);
     spi_transfer(mask);
     spi_transfer(data);
 	mcp2515_unselect();
-
-#ifdef MCPSPIDEBUG
-	DEVICE_PRINT("done bit_modify");
-#endif   
 }
 
 /*
@@ -162,7 +129,14 @@ int mcp2515_init(can_init_t* settings, struct can_device* dev)
     
     dev->settings = settings;
 
-    return mcp2515_reinit(dev);
+    int retval = mcp2515_reinit(dev);
+
+    // delay a long time to allow clock to stabilize, when first started
+    wdt_reset();
+    _delay_ms(100);
+    wdt_reset();
+
+    return retval;
 }
 
 /*
@@ -273,24 +247,15 @@ int mcp2515_reinit(struct can_device* dev)
     // this puts device in configuration mode
     // this is only mode that allows CNF1,2,3
     // TXRTSCTRL, filter and mask registers to be modified
-#ifdef MCPSPIDEBUG
-	DEVICE_PRINT("Start reset");
-#endif   
 	mcp2515_select();
     spi_transfer( MCP_SPI_RESET );
 	mcp2515_unselect();
-#ifdef MCPSPIDEBUG
-	DEVICE_PRINT("done reset");
-#endif   
 
     // delay for a while to let chip settle down
     _delay_ms(20);
 
 	// make sure we are in configuration mode
 	if (mcp2515_read_register( MCP_CANSTAT ) != _BV(MCP_OPMOD2)) {
-#ifdef MCPSPIDEBUG
-		DEVICE_PRINT("not in config mode");
-#endif   
 		return CAN_FAILINIT;
 	}
 	
@@ -398,14 +363,6 @@ int mcp2515_reinit(struct can_device* dev)
     // Device to normal mode (or loopback)
 	mcp2515_write_register( MCP_CANCTRL, (settings->loopback_on ? _BV(MCP_REQOP1) : 0) );
 
-	// delay a long time to allow clock to stabilize, when first started
-    if (pdev->init == 0)
-    {
-        wdt_reset();
-        _delay_ms(100);
-        wdt_reset();
-    }
-    
 	// CAN_INT, input, also activate the pullup resistor
 	*pdev->ddr_port &= ~pdev->port_pin;
 	*pdev->port |= pdev->port_pin;

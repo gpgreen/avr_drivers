@@ -23,7 +23,7 @@
  *
  * The <id> is 3 (standard) or 8 (extended) bytes in ASCII Hex (base64).
  * The <dlc> is a one byte ASCII number ('0' - '8')
- * The <data> section has at much ASCII Hex bytes as defined by the <dlc>
+ * The <data> section has up to 8 ASCII Hex bytes as defined by the <dlc>
  *
  * Examples:
  *
