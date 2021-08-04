@@ -646,7 +646,7 @@ ISR(MCP2515_INT_VECT)
 	
 #if defined(MCP2515_INT_VECT_ANY_CHANGE)
 	// see if can interrupt pin is lo, ie we got a falling edge
-	if (bit_is_clear(*s_mcp2515_pdev->pin, s_mcp2515_pdev->port_pin))
+	if (!(*s_mcp2515_pdev->pin & s_mcp2515_pdev->port_pin))
 		s_mcp2515_pdev->flag = 1;
 	else
 		return;
