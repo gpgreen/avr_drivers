@@ -74,7 +74,7 @@ typedef struct
   uint8_t   rtr;
   uint8_t   length;
   uint8_t   data[8];
-#ifdef CAN_TSTAMP
+#ifdef CAN_TIMESTAMP
   uint32_t  tstamp;
 #endif
 } can_msg_t;

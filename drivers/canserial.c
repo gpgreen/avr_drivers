@@ -3,6 +3,10 @@
 #include "canserial.h"
 #include "uart.h"
 
+#ifdef CAN_TIMESTAMP
+#include "timer.h"
+#endif
+
 /* handles a received message, does logging */
 int canserial_handle_recv_message(struct can_serial* dev, const can_msg_t* msg)
 {
@@ -75,7 +79,11 @@ static void print_msg(const can_msg_t* msg)
 /* log a send can message - default implementation */
 void log_send(const can_msg_t* msg)
 {
-	putchar('=');
+#ifdef CAN_TIMESTAMP
+    printf("-> <%ld>", msg->tstamp);
+#else
+    putchar('=');
+#endif
 	putchar(msg->idtype == CAN_EXTENDED_ID ? 'T' : 't');
 	print_msg(msg);
 	putchar('\n');
@@ -84,6 +92,10 @@ void log_send(const can_msg_t* msg)
 /* log a received can message - default implementation */
 void log_recv(const can_msg_t* msg)
 {
+#ifdef CAN_TIMESTAMP
+    /* timestamp in jiffies */
+    printf("<%ld>", msg->tstamp);
+#endif
 	/* received can message */
 	putchar(msg->idtype == CAN_EXTENDED_ID ? 'T' : 't');
 	print_msg(msg);
@@ -180,6 +192,9 @@ int canserial_parse_input_buffer(struct can_serial* dev, struct fifo* ififo)
 				hex_chars_to_go = 3;
 				parse_state = 1;
 				memset(&dev->send_msg, 0, sizeof(can_msg_t));
+#ifdef CAN_TIMESTAMP
+                dev->tstamp = jiffie();
+#endif
                 dev->send_msg.idtype = CAN_STANDARD_ID;
 				dev->send_msg.rtr = (ch =='r') ? 1 : 0;
 			} else if(ch == 'T' || ch == 'R') {
@@ -187,6 +202,9 @@ int canserial_parse_input_buffer(struct can_serial* dev, struct fifo* ififo)
 				hex_chars_to_go = 8;
 				parse_state = 1;
 				memset(&dev->send_msg, 0, sizeof(can_msg_t));
+#ifdef CAN_TIMESTAMP
+                dev->tstamp = jiffie();
+#endif
                 dev->send_msg.idtype = CAN_EXTENDED_ID;
 				dev->send_msg.rtr = (ch =='R') ? 1 : 0;
 			} else if(ch == 'D' || ch == 'c') {

@@ -26,7 +26,7 @@ option(PYPILOT_CONTROLLER_FIRMWARE "build pypilot-controller firmware" OFF)
 ##########################################################################
 
 ##########################################################################
-# tools to beused for programming the AVR
+# tools to be used for programming the AVR
 ##########################################################################
 set(AVR_UPLOADTOOL avrdude)
 set(AVR_PROGRAMMER usbtiny)

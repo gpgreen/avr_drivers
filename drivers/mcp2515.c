@@ -9,6 +9,11 @@
 #include "globals.h"
 #include "driver.h"
 
+/* if we have defined use of timestamps, include the 'jiffie' timer */
+#ifdef CAN_TIMESTAMP
+#include "timer.h"
+#endif
+
 // globals
 
 static const char* k_name = "mcp2515:";
@@ -681,6 +686,11 @@ ISR(MCP2515_INT_VECT)
 		if (s_fifo_can_recvd.w == MCP_RECVBUFLEN)
 			s_fifo_can_recvd.w = 0;
 		s_fifo_can_recvd.count++;
+
+        // if we are using timestamps, get it now
+#ifdef CAN_TIMESTAMP
+        p_message->tstamp = jiffie();
+#endif
 
 		// calculate the SPI command, this also clears the received flag for the
 		// interrupt when CS is put high again
