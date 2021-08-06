@@ -210,7 +210,7 @@ if(COMPASS_FIRMWARE)
   set(PROJECT_DEF_PATH "${CMAKE_SOURCE_DIR}/../../compass")
 endif(COMPASS_FIRMWARE)
 
-# set the include path to find 'compass/def.h'
+# set the include path to find 'canbus-shield/def.h'
 if(CANBUS_SHIELD_FIRMWARE)
   set(PROJECT_DEF_PATH "${CMAKE_SOURCE_DIR}/../../canbus-shield")
 endif(CANBUS_SHIELD_FIRMWARE)

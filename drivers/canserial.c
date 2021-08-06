@@ -193,7 +193,7 @@ int canserial_parse_input_buffer(struct can_serial* dev, struct fifo* ififo)
 				parse_state = 1;
 				memset(&dev->send_msg, 0, sizeof(can_msg_t));
 #ifdef CAN_TIMESTAMP
-                dev->tstamp = jiffie();
+                dev->send_msg.tstamp = jiffie();
 #endif
                 dev->send_msg.idtype = CAN_STANDARD_ID;
 				dev->send_msg.rtr = (ch =='r') ? 1 : 0;
@@ -203,7 +203,7 @@ int canserial_parse_input_buffer(struct can_serial* dev, struct fifo* ififo)
 				parse_state = 1;
 				memset(&dev->send_msg, 0, sizeof(can_msg_t));
 #ifdef CAN_TIMESTAMP
-                dev->tstamp = jiffie();
+                dev->send_msg.tstamp = jiffie();
 #endif
                 dev->send_msg.idtype = CAN_EXTENDED_ID;
 				dev->send_msg.rtr = (ch =='R') ? 1 : 0;
