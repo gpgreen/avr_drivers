@@ -10,16 +10,18 @@
 ##########################################################################
 
 set(avrdrivers_SOURCES
-     spi.c
-     spi.h
-     timer.c
-     timer.h
-     timer1.c
-     timer1.h
-     uart.c
-     uart_def.h
-     uart.h
-     driver.h
+  debounce.c
+  debounce.h
+  spi.c
+  spi.h
+  timer.c
+  timer.h
+  timer1.c
+  timer1.h
+  uart.c
+  uart_def.h
+  uart.h
+  driver.h
 )
 
 if (AHRS_FIRMWARE)
