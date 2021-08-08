@@ -18,7 +18,7 @@ set(avrcanlib_SOURCES
   can_delays.h
 )
 
-if (AHRS_FIRMWARE)
+if (CANAERO)
    list(APPEND avrcanlib_SOURCES
      canaero_bss.c
      canaero_bss.h
@@ -29,7 +29,14 @@ if (AHRS_FIRMWARE)
      canaero_nis.c
      canaero_nis.h
    )
-endif(AHRS_FIRMWARE)
+endif(CANAERO)
+
+if (NMEA_2000)
+  list(APPEND avrcanlib_SOURCES
+    nmea2000.h
+    nmea2000.c
+    )
+endif(NMEA_2000)
 
 add_avr_library(avrcanlib ${avrcanlib_SOURCES})
 

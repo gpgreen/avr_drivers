@@ -12,13 +12,19 @@
 cmake_minimum_required(VERSION 2.8)
 
 # build for the 'ahrs' firmware
-option(AHRS_FIRMWARE "build ahrs firmware" OFF)
+option(AHRS_FIRMWARE "build for ahrs firmware" OFF)
 
 # build for the 'compass' firmware
-option(COMPASS_FIRMWARE "build compass firmware" OFF)
+option(COMPASS_FIRMWARE "build for compass firmware" OFF)
 
-# build for the 'compass' firmware
-option(PYPILOT_CONTROLLER_FIRMWARE "build pypilot-controller firmware" OFF)
+# build for the 'pypilot-controller' firmware
+option(PYPILOT_CONTROLLER_FIRMWARE "build for pypilot-controller firmware" OFF)
+
+# add canaero routines to library
+option(CANAERO "include canaero functions" OFF)
+
+# add nmea2000 routines to library
+option(NMEA_2000 "include nmea2000 functions" OFF)
 
 ### TOOLCHAIN SETUP AREA #################################################
 # Set any variables used in the toolchain prior project() call. In that
@@ -33,12 +39,13 @@ set(AVR_PROGRAMMER usbtiny)
 set(AVR_UPLOADTOOL_PORT usb)
 
 ##########################################################################
-# AVR and fuses needs to be set
+# AVR, clock speed and fuses needs to be set
 ##########################################################################
 
 set(AVR_USE_E_FUSE on)
 
 if (AHRS_FIRMWARE)
+  set(MCU_SPEED "8000000UL")
   set(AVR_MCU at90can32)
   set(AVRDUDE_MCU c32)
   set(AVR_E_FUSE 0xfb)
@@ -47,6 +54,7 @@ if (AHRS_FIRMWARE)
 endif(AHRS_FIRMWARE)
 
 if (COMPASS_FIRMWARE)
+  set(MCU_SPEED "16000000UL")
   set(AVR_MCU atmega644)
   set(AVRDUDE_MCU m44)
   set(AVR_E_FUSE 0xfc)
@@ -55,6 +63,7 @@ if (COMPASS_FIRMWARE)
 endif(COMPASS_FIRMWARE)
 
 if (CANBUS_SHIELD_FIRMWARE)
+  set(MCU_SPEED "16000000UL")
   set(AVR_MCU atmega328p)
   set(AVRDUDE_MCU m328p)
   set(AVR_E_FUSE 0xfc)
@@ -64,6 +73,7 @@ if (CANBUS_SHIELD_FIRMWARE)
 endif(CANBUS_SHIELD_FIRMWARE)
 
 if (PYPILOT_CONTROLLER_FIRMWARE)
+  set(MCU_SPEED "8000000UL")
   set(AVR_MCU atmega328p)
   set(AVRDUDE_MCU m328p)
   set(AVR_E_FUSE 0xfc)
@@ -105,26 +115,6 @@ message(STATUS "Current L_FUSE is set to: ${AVR_L_FUSE}")
 if(NOT CMAKE_BUILD_TYPE)
    set(CMAKE_BUILD_TYPE Release)
 endif(NOT CMAKE_BUILD_TYPE)
-
-##########################################################################
-# needs to be defined for AVR toolchain
-##########################################################################
-
-if(AHRS_FIRMWARE)
-  set(MCU_SPEED "8000000UL")
-endif(AHRS_FIRMWARE)
-
-if(COMPASS_FIRMWARE)
-  set(MCU_SPEED "16000000UL")
-endif(COMPASS_FIRMWARE)
-
-if(CANBUS_SHIELD_FIRMWARE)
-  set(MCU_SPEED "16000000UL")
-endif(CANBUS_SHIELD_FIRMWARE)
-
-if(PYPILOT_CONTROLLER_FIRMWARE)
-  set(MCU_SPEED "8000000UL")
-endif(PYPILOT_CONTROLLER_FIRMWARE)
 
 ##########################################################################
 # some cmake cross-compile necessities
